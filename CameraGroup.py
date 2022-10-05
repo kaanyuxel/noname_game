@@ -1,6 +1,5 @@
 import pygame, sys
 from random import randint
-import Player
 
 class CameraGroup(pygame.sprite.Group):
 	def __init__(self):
@@ -12,7 +11,7 @@ class CameraGroup(pygame.sprite.Group):
 		self.half_h = self.display_surface.get_size()[1] // 2
 
 		# box setup
-		self.camera_borders = {'left': 250, 'right': 250, 'top': 250, 'bottom': 250}
+		self.camera_borders = {'left': 10, 'right': 10, 'top': 10, 'bottom': 10}
 		l = self.camera_borders['left']
 		t = self.camera_borders['top']
 		w = self.display_surface.get_size()[0]  - (self.camera_borders['left'] + self.camera_borders['right'])
@@ -25,11 +24,11 @@ class CameraGroup(pygame.sprite.Group):
 		self.ground_rect = self.ground_surf.get_rect(topleft = (0,0))
 
 		# camera speed
-		self.keyboard_speed = 2
+		self.mouse_speed = 0.5
 
 		# zoom 
 		self.zoom_scale = 1
-		self.internal_surf_size = (1024,1024)
+		self.internal_surf_size = (w,h)
 		self.internal_surf = pygame.Surface(self.internal_surf_size, pygame.SRCALPHA)
 		self.internal_rect = self.internal_surf.get_rect(center = (self.half_w,self.half_h))
 		self.internal_surface_size_vector = pygame.math.Vector2(self.internal_surf_size)
@@ -54,19 +53,50 @@ class CameraGroup(pygame.sprite.Group):
 		self.offset.x = self.camera_rect.left - self.camera_borders['left']
 		self.offset.y = self.camera_rect.top - self.camera_borders['top']
 
-	def keyboard_control(self):
-		keys = pygame.key.get_pressed()
-		if keys[pygame.K_a]: self.camera_rect.x -= self.keyboard_speed
-		if keys[pygame.K_d]: self.camera_rect.x += self.keyboard_speed
-		if keys[pygame.K_w]: self.camera_rect.y -= self.keyboard_speed
-		if keys[pygame.K_s]: self.camera_rect.y += self.keyboard_speed
+	def mouse_control(self):
+		mouse = pygame.math.Vector2(pygame.mouse.get_pos())
+		mouse_offset_vector = pygame.math.Vector2()
 
-		self.offset.x = self.camera_rect.left - self.camera_borders['left']
-		self.offset.y = self.camera_rect.top - self.camera_borders['top']
+		left_border = self.camera_borders['left']
+		top_border = self.camera_borders['top']
+		right_border = self.display_surface.get_size()[0] - self.camera_borders['right']
+		bottom_border = self.display_surface.get_size()[1] - self.camera_borders['bottom']
+
+		if top_border < mouse.y < bottom_border:
+			if mouse.x < left_border:
+				mouse_offset_vector.x = mouse.x - left_border
+				pygame.mouse.set_pos((left_border,mouse.y))
+			if mouse.x > right_border:
+				mouse_offset_vector.x = mouse.x - right_border
+				pygame.mouse.set_pos((right_border,mouse.y))
+		elif mouse.y < top_border:
+			if mouse.x < left_border:
+				mouse_offset_vector = mouse - pygame.math.Vector2(left_border,top_border)
+				pygame.mouse.set_pos((left_border,top_border))
+			if mouse.x > right_border:
+				mouse_offset_vector = mouse - pygame.math.Vector2(right_border,top_border)
+				pygame.mouse.set_pos((right_border,top_border))
+		elif mouse.y > bottom_border:
+			if mouse.x < left_border:
+				mouse_offset_vector = mouse - pygame.math.Vector2(left_border,bottom_border)
+				pygame.mouse.set_pos((left_border,bottom_border))
+			if mouse.x > right_border:
+				mouse_offset_vector = mouse - pygame.math.Vector2(right_border,bottom_border)
+				pygame.mouse.set_pos((right_border,bottom_border))
+
+		if left_border < mouse.x < right_border:
+			if mouse.y < top_border:
+				mouse_offset_vector.y = mouse.y - top_border
+				pygame.mouse.set_pos((mouse.x,top_border))
+			if mouse.y > bottom_border:
+				mouse_offset_vector.y = mouse.y - bottom_border
+				pygame.mouse.set_pos((mouse.x,bottom_border))
+
+		self.offset += mouse_offset_vector * self.mouse_speed		
 
 	def custom_draw(self,control):
-		self.center_target_camera(control)
-		self.box_target_camera(control)
+		
+		self.mouse_control()
 
 		self.internal_surf.fill('#71ddee')
 		# ground 
@@ -81,4 +111,4 @@ class CameraGroup(pygame.sprite.Group):
 		scaled_surf = pygame.transform.scale(self.internal_surf,self.internal_surface_size_vector * self.zoom_scale)
 		scaled_rect = scaled_surf.get_rect(center = (self.half_w,self.half_h))
 
-		self.display_surface.blit(scaled_surf,scaled_rect)
+		self.display_surface.blit(scaled_surf,scaled_rect)	

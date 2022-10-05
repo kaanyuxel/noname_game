@@ -8,112 +8,114 @@ class Player(pygame.sprite.Sprite):
         self.character = Character.Character()
         self.image = self.character.walk_down()[0]
         self.rect = self.image.get_rect(center = (512, 512))
-        self.direction = pygame.math.Vector2()
-        self.speed = 1
+        
         self.walkCount = 0
         self.attack_frame = 0
         self.face = "down"
-        self.moving = False
-        self.clicked = pygame.math.Vector2(512, 512)
-        self.test_keyboard = False
+        self.test_keyboard = True
+
+        self.fight_1 = False
+        self.fight_2 = False
+        self.attacking = False
+
+
+        self.left_click = False
+        self.pos = pygame.Vector2(self.rect.centerx, self.rect.centery)
+        self.target = pygame.Vector2(self.rect.centerx, self.rect.centery)
+        self.speed = 2
+        self.cam_group = group
+        
 
     def input(self):
-        keys = pygame.key.get_pressed()
-        mouse = pygame.math.Vector2(pygame.mouse.get_pos())
-        click = pygame.mouse.get_pressed()
-        angle = -degrees(atan2(self.rect.centery - mouse.y, self.rect.centerx - mouse.x)) + 180          
-        if keys[pygame.K_f] or keys[pygame.K_r]:
-            self.attack_frame += 1
-            if self.attack_frame > 5:
-                self.attack_frame = 0
-            if keys[pygame.K_f]:    
-                self.animate_fight(1, self.attack_frame)
-            else:
-                self.animate_fight(2, self.attack_frame)
         
+        #click = pygame.mouse.get_pressed()     
+        if self.left_click:
+            self.target = pygame.math.Vector2(pygame.mouse.get_pos()) + self.cam_group.offset
+            self.face_update()    
+            self.left_click = False
+        
+        keys = pygame.key.get_pressed()     
         if not keys[pygame.K_f] and not keys[pygame.K_r]:    
-
-            if click[0] == 1:
-                self.clicked = pygame.math.Vector2(pygame.mouse.get_pos())
-
-                if angle > 80 and angle < 110:
-                    self.face = "up"
-                elif angle > 260 and angle < 280:
-                    self.face = "down"
-                elif angle > 110 and angle < 260:
-                    self.face = "left"
-                elif angle < 80 or angle > 280:
-                    self.face = "right"
-
-            if self.walkCount >= 7:
-                self.walkCount = 0
-
-            if self.face == "up": 
-                if self.clicked.y != self.rect.centery:  
-                    #print(angle, self.clicked.y, self.face, self.clicked.y, self.rect.centery)  
-                    self.walkCount += 1
-                    self.animate_walk(self.walkCount)      
-                    self.direction.x = 0
-                    self.direction.y = -1
-                else:  
-                    self.animate_stop()
-            elif self.face == "down": 
-                if self.clicked.y != self.rect.centery:    
-                   #print(angle, self.clicked.y, self.face, self.clicked.y, self.rect.centery)  
-                   self.walkCount += 1
-                   self.animate_walk(self.walkCount)      
-                   self.direction.x = 0
-                   self.direction.y = 1
-                else:
-                    self.animate_stop()   
-            elif self.face == "left": 
-                if self.clicked.x != self.rect.centerx:    
-                    #print(self.face, self.clicked.x, self.rect.centerx)  
-                    self.walkCount += 1
-                    self.animate_walk(self.walkCount)      
-                    self.direction.x = -1
-                    self.direction.y = 0
-                else:
-                    self.animate_stop()    
-            elif self.face == "right":
-                if self.clicked.x != self.rect.centerx:   
-                    #print(self.face, self.clicked.x, self.rect.centerx)   
-                    self.walkCount += 1
-                    self.animate_walk(self.walkCount)      
-                    self.direction.x = 1
-                    self.direction.y = 0
-                else:
-                    self.animate_stop()    
-
             if self.test_keyboard:            
                 if keys[pygame.K_UP]:
-                    y = -1
-                    self.walkCount += 1
                     self.face = "up"  
-                    self.animate_walk(self.walkCount)
+                    self.target = pygame.Vector2(self.rect.centerx , self.rect.centery - 1*self.speed)
                 elif keys[pygame.K_DOWN]:
-                    y = 1
-                    self.walkCount += 1
                     self.face = "down"
-                    self.animate_walk(self.walkCount)   
+                    self.target = pygame.Vector2(self.rect.centerx, self.rect.centery + 1*self.speed)
                 elif keys[pygame.K_RIGHT]:     
-                    x = 1
-                    self.walkCount += 1
                     self.face = "right"
-                    self.animate_walk(self.walkCount)
+                    self.target = pygame.Vector2(self.rect.centerx + 1*self.speed, self.rect.centery)
                 elif keys[pygame.K_LEFT]:
-                    x = -1
-                    self.walkCount += 1
                     self.face = "left"
-                    self.animate_walk(self.walkCount)
-                else:
-                    x = y = 0
-                    self.animate_walk(0)
-
+                    self.target = pygame.Vector2(self.rect.centerx - 1*self.speed, self.rect.centery)
+        
     def update(self):
         self.input()
-        self.rect.center += self.direction * self.speed
+        self.attack()
+        self.movement()
 
+
+    def face_update(self):
+        angle = -degrees(atan2(self.rect.centery - self.target.y, self.rect.centerx - self.target.x)) + 180 
+        if angle > 80 and angle < 100:
+            self.face = "up"
+        if angle > 260 and angle < 280:
+            self.face = "down"
+        
+        if angle > 100 and angle < 260:
+            self.face = "left"
+        if angle < 80 or angle > 280:
+            self.face = "right"   
+
+    def movement(self):
+        if self.walkCount >= 35:
+            self.walkCount = 0 
+
+        move = self.target - self.pos
+        move_length = move.length()
+        
+        if move_length < self.speed:
+            self.pos = self.target
+            self.pos = self.rect.center 
+            #self.animate_walk(0)
+        elif move_length != 0:
+            self.walkCount += 1
+            move.normalize_ip()
+            move = move * self.speed
+            self.pos += move   
+            self.animate_walk(self.walkCount//7)
+            if self.attacking == True:
+                self.attack() 
+
+        self.rect.center = list(int(v) for v in self.pos)
+
+    def set_attack(self, key):
+        if key == pygame.K_f:
+            self.fight_1 = True
+        if key == pygame.K_r:
+            self.fight_2 = True
+        self.attacking = True             
+
+    def attack(self):
+        if self.fight_1 or self.fight_2:
+            self.attack_frame += 1
+            if self.fight_1:                 
+                if self.attack_frame > 30:
+                    self.attack_frame = 0
+                    self.fight_1 = False
+                    self.attacking = False
+                self.animate_fight(1, self.attack_frame//6)
+                
+            if self.fight_2:
+                if self.attack_frame > 30:
+                    self.attack_frame = 0
+                    self.fight_2 = False
+                    self.attacking = False
+                self.animate_fight(2, self.attack_frame//6)
+        else:
+            self.animate_walk(0)                          
+        
     def animate_walk(self, walk_count): 
         if self.face == "right":
             self.image = self.character.walk_right()[walk_count]
@@ -123,7 +125,7 @@ class Player(pygame.sprite.Sprite):
             self.image = self.character.walk_up()[walk_count]
         if self.face == "down":
             self.image = self.character.walk_down()[walk_count]
-        self.rect = self.image.get_rect(center = self.rect.center)     
+        self.rect = self.image.get_rect(center = self.rect.center)  
 
     def animate_fight(self, fight_type, fight_count):
         if fight_type == 1:
@@ -143,9 +145,4 @@ class Player(pygame.sprite.Sprite):
             if self.face == "up":
                 self.image = self.character.fight_2_up()[fight_count]
             if self.face == "down":
-                self.image = self.character.fight_2_down()[fight_count]     
-    
-    def animate_stop(self):
-        self.direction.x = 0
-        self.direction.y = 0                  
-        self.animate_walk(0)                                        
+                self.image = self.character.fight_2_down()[fight_count]                                         

@@ -6,8 +6,8 @@ pygame.init()
 
 clock = pygame.time.Clock()
 
-SCREEN_WIDTH = 1024
-SCREEN_HEIGHT = 1024
+SCREEN_WIDTH = 1200
+SCREEN_HEIGHT = 800
 
 #game window
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -19,24 +19,35 @@ camera_group = CameraGroup.CameraGroup()
 player = Player.Player(camera_group)
 
 while run_game:
+
     for event in pygame.event.get():
 
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if event.button == 1:
+                player.left_click = True    
+        
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        if event.type == pygame.KEYDOWN:
+        
+        if event.type == pygame.KEYDOWN:            
             if event.key == pygame.K_ESCAPE:
                 pygame.quit()
                 sys.exit()
+            if event.key == pygame.K_f or event.key == pygame.K_r:
+                player.set_attack(event.key)                  
+            if event.key == pygame.K_SPACE:
+                camera_group.center_target_camera(player)    
 
-        if event.type == pygame.MOUSEWHEEL:
-            camera_group.zoom_scale += event.y * 0.5
+
+        #if event.type == pygame.MOUSEWHEEL:
+        #    camera_group.zoom_scale += event.y * 0.5
 
     screen.fill('#71ddee')
 
     player.update()
     camera_group.custom_draw(player)
 
-    pygame.display.flip()
-    clock.tick(30)
+    pygame.display.update()
+    clock.tick(144)
 pygame.quit()
