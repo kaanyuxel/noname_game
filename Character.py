@@ -20,7 +20,7 @@ class Character:
 		self.flash()
 
 	def get_image(self, image, frame, width, height, scale):
-		image_opt = pygame.Surface((width, height), pygame.SRCALPHA).convert_alpha()
+		image_opt = pygame.Surface((width, height), pygame.SRCALPHA)
 		image_opt.blit(image, (0, 0), ((frame * width), 0, width, height))
 		image_opt = pygame.transform.scale(image_opt, (width * scale, height * scale))
 		return image_opt
