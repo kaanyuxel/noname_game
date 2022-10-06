@@ -24,20 +24,21 @@ while run_game:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             if event.button == 1:
-                player.left_click = True    
-        
+                player.left_click = True
+
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
-        
-        if event.type == pygame.KEYDOWN:            
-            if event.key == pygame.K_ESCAPE:
-                pygame.quit()
-                sys.exit()
-            if event.key == pygame.K_f or event.key == pygame.K_r:
-                player.set_attack(event.key)                  
-            if event.key == pygame.K_SPACE:
-                camera_group.center_target_camera(player)    
+
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_ESCAPE]:
+            pygame.quit()
+            sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if keys[pygame.K_f] or keys[pygame.K_r]:
+                player.set_attack(event.key)
+        if keys[pygame.K_SPACE]:
+            camera_group.center_target_camera(player)
 
 
         #if event.type == pygame.MOUSEWHEEL:
