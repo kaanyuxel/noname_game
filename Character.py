@@ -20,17 +20,15 @@ class Character:
 		self.flash()
 
 	def get_image(self, image, frame, width, height, scale):
-		image_opt = pygame.Surface((width, height)).convert_alpha()
+		image_opt = pygame.Surface((width, height), pygame.SRCALPHA).convert_alpha()
 		image_opt.blit(image, (0, 0), ((frame * width), 0, width, height))
 		image_opt = pygame.transform.scale(image_opt, (width * scale, height * scale))
-		self.colour = (0,128,0)
-		image_opt.set_colorkey(self.colour)
 		return image_opt
-	
+
 	def animator(self, img, direction, steps):
 		list = []
 		for step in range(steps):
-			list.append(self.get_image(img, step, 48, 48, 2))		
+			list.append(self.get_image(img, step, 48, 48, 2))
 		return list
 
 	def idle(self):
@@ -41,7 +39,7 @@ class Character:
 		image = pygame.image.load(self.left + "WarriorLeftIdle.png")
 		self.idle_left = self.animator(image, 'left', self.idle_steps)
 		image = pygame.image.load(self.right + "WarriorRightIdle.png")
-		self.idle_right = self.animator(image, 'right', self.idle_steps)		
+		self.idle_right = self.animator(image, 'right', self.idle_steps)
 
 	def walk(self):
 		image = pygame.image.load(self.up + "WarriorUpWalk.png")
