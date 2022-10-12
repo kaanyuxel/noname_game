@@ -1,12 +1,13 @@
 import pygame
 import Player
 import CameraGroup
+import Map
 
 pygame.init()
 
 clock = pygame.time.Clock()
 
-SCREEN_WIDTH = 1200
+SCREEN_WIDTH = 1350
 SCREEN_HEIGHT = 800
 
 #game window
@@ -16,9 +17,13 @@ run_game = True
 
 
 camera_group = CameraGroup.CameraGroup()
+game_map = Map.Map(camera_group)
 player = Player.Player(camera_group)
 
 while run_game:
+    screen.fill('gray')
+    game_map.draw(screen)
+    game_map.update()
 
     for event in pygame.event.get():
 
@@ -44,11 +49,8 @@ while run_game:
         #if event.type == pygame.MOUSEWHEEL:
         #    camera_group.zoom_scale += event.y * 0.5
 
-    screen.fill('#71ddee')
-
-    player.update()
     camera_group.custom_draw(player)
-
+    player.update()
     pygame.display.update()
     clock.tick(144)
 pygame.quit()
