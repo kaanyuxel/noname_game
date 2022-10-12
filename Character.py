@@ -9,10 +9,10 @@ class Character:
 		self.fight_2_steps = 6
 		self.flash_steps = 5
 		self.idle_steps = 5
-		self.up    = "warrior/Up/Png/"
-		self.down  = "warrior/Down/Png/"
-		self.left  = "warrior/Left/Png/"
-		self.right = "warrior/Right/Png/"
+		self.up    = "graphics/Warrior/Up/Png/"
+		self.down  = "graphics/Warrior/Down/Png/"
+		self.left  = "graphics/Warrior/Left/Png/"
+		self.right = "graphics/Warrior/Right/Png/"
 		self.idle()
 		self.walk()
 		self.fight_1()
@@ -28,7 +28,7 @@ class Character:
 	def animator(self, img, direction, steps):
 		list = []
 		for step in range(steps):
-			list.append(self.get_image(img, step, 48, 48, 2))
+			list.append(self.get_image(img, step, 48, 48, 1.5))
 		return list
 
 	def idle(self):
