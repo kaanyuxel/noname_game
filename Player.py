@@ -28,8 +28,7 @@ class Player(pygame.sprite.Sprite):
         
 
     def input(self):
-        
-        #click = pygame.mouse.get_pressed()     
+    
         if self.left_click:
             self.target = pygame.math.Vector2(pygame.mouse.get_pos()) + self.cam_group.offset
             self.face_update()    
@@ -38,7 +37,7 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()        
         if self.test_keyboard:            
             if keys[pygame.K_UP]:
-                self.face = "up"  
+                self.face = "up"
                 self.target = pygame.Vector2(self.rect.centerx , self.rect.centery - 1*self.speed)
             elif keys[pygame.K_DOWN]:
                 self.face = "down"
@@ -54,6 +53,7 @@ class Player(pygame.sprite.Sprite):
         self.input()
         if self.attacking == True:
             self.attack()
+        self.check_collision()    
         self.movement()
 
 
@@ -70,14 +70,14 @@ class Player(pygame.sprite.Sprite):
             self.face = "right"   
 
     def movement(self):
+
         if self.walkCount >= 35:
-            self.walkCount = 0 
+            self.walkCount = 0
 
         move = self.target - self.pos
         move_length = move.length()
         
         if move_length < self.speed:
-            self.pos = self.target
             self.pos = self.rect.center
             if self.attacking == False: 
                 self.animate_idle()
@@ -107,11 +107,13 @@ class Player(pygame.sprite.Sprite):
                 if self.attack_frame > 30:
                     self.attack_frame = 0
                     self.fight_1 = False
+                    self.fight_2 = False
                     self.attacking = False
                 
             if self.fight_2:
                 if self.attack_frame > 30:
                     self.attack_frame = 0
+                    self.fight_1 = False
                     self.fight_2 = False
                     self.attacking = False
                 self.animate_fight(2, self.attack_frame//6)                      
@@ -160,4 +162,17 @@ class Player(pygame.sprite.Sprite):
             if self.face == "up":
                 self.image = self.character.fight_2_up[fight_count]
             if self.face == "down":
-                self.image = self.character.fight_2_down[fight_count]                                         
+                self.image = self.character.fight_2_down[fight_count]           
+
+    def check_collision(self):
+        group = pygame.sprite.Group()
+        for s in self.cam_group.sprites():
+            if hasattr(s, 'name'):
+                if s.name == "Top" and self.rect.colliderect(s.rect) and (self.face == "up" or self.face == "left" or self.face == "right"):
+                    self.target = pygame.Vector2(self.rect.centerx , self.rect.centery + 1*self.speed)                    
+                elif s.name == "Bottom" and self.rect.colliderect(s.rect) and (self.face == "down" or self.face == "left" or self.face == "right"):
+                    self.target = pygame.Vector2(self.rect.centerx , self.rect.centery - 1*self.speed) 
+                elif (s.name == "Left" or s.name == "BottomL") and self.rect.colliderect(s.rect) and (self.face == "left" or self.face == "down"):
+                    self.target = pygame.Vector2(self.rect.centerx + 1*self.speed, self.rect.centery) 
+                elif (s.name == "Right" or s.name == "BottomR") and self.rect.colliderect(s.rect) and (self.face == "right" or self.face == "down"):
+                    self.target = pygame.Vector2(self.rect.centerx - 1*self.speed, self.rect.centery)
