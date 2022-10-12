@@ -19,10 +19,8 @@ class CameraGroup(pygame.sprite.Group):
 		self.camera_rect = pygame.Rect(l,t,w,h)
 
 		# ground
-
-		self.ground_surf = pygame.image.load('graphics/ground.png').convert_alpha()
+		self.ground_surf = pygame.image.load('graphics/map.png').convert_alpha()
 		self.ground_rect = self.ground_surf.get_rect(topleft = (0,0))
-
 		# camera speed
 		self.mouse_speed = 0.5
 
@@ -98,7 +96,7 @@ class CameraGroup(pygame.sprite.Group):
 		
 		self.mouse_control()
 
-		self.internal_surf.fill('#71ddee')
+		self.internal_surf.fill('gray')
 		# ground 
 		ground_offset = self.ground_rect.topleft - self.offset + self.internal_offset
 		self.internal_surf.blit(self.ground_surf,ground_offset)
