@@ -20,6 +20,7 @@ camera_group = CameraGroup.CameraGroup()
 game_map = Map.Map(camera_group)
 player = Player.Player(camera_group)
 
+
 while run_game:
     screen.fill('gray')
     game_map.draw(screen)
@@ -33,12 +34,10 @@ while run_game:
 
         if event.type == pygame.QUIT:
             pygame.quit()
-            sys.exit()
 
         keys = pygame.key.get_pressed()
         if keys[pygame.K_ESCAPE]:
             pygame.quit()
-            sys.exit()
         if event.type == pygame.KEYDOWN:
             if keys[pygame.K_f] or keys[pygame.K_r]:
                 player.set_attack(event.key)
