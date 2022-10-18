@@ -1,6 +1,7 @@
-import pygame, sys
-import Character
+import pygame
 from math import atan2, degrees 
+import Character
+import PlayerUI
 
 class Player(pygame.sprite.Sprite):
     def __init__(self,group):
@@ -8,6 +9,11 @@ class Player(pygame.sprite.Sprite):
         self.character = Character.Character()
         self.image = self.character.walk_down[0]
         self.rect = self.image.get_rect(center = (512, 512))
+        self.name = "player "
+
+        self.health_bar_pos = (self.rect.centerx, self.rect.centery - self.image.get_height() // 2)
+        self.health_bar = PlayerUI.HealthBar(self.health_bar_pos)
+        group.add(self.health_bar)
         
         self.walkCount = 0
         self.attack_frame = 0
@@ -51,8 +57,7 @@ class Player(pygame.sprite.Sprite):
         
     def update(self):
         self.input()
-        if self.attacking == True:
-            self.attack()
+        self.attack()
         self.check_collision()    
         self.movement()
 
@@ -91,6 +96,8 @@ class Player(pygame.sprite.Sprite):
                 self.attack() 
 
         self.rect.center = list(int(v) for v in self.pos)
+        self.health_bar_pos = (self.rect.centerx, self.rect.centery - self.image.get_height() // 2)
+        self.health_bar.set_position(self.health_bar_pos)
 
     def set_attack(self, key):
         if key == pygame.K_f:
@@ -100,23 +107,24 @@ class Player(pygame.sprite.Sprite):
         self.attacking = True             
 
     def attack(self):
-        if self.fight_1 or self.fight_2:
-            self.attack_frame += 1
-            if self.fight_1:          
-                self.animate_fight(1, self.attack_frame//6)       
-                if self.attack_frame > 30:
-                    self.attack_frame = 0
-                    self.fight_1 = False
-                    self.fight_2 = False
-                    self.attacking = False
-                
-            if self.fight_2:
-                if self.attack_frame > 30:
-                    self.attack_frame = 0
-                    self.fight_1 = False
-                    self.fight_2 = False
-                    self.attacking = False
-                self.animate_fight(2, self.attack_frame//6)                      
+        if self.attacking == True:
+            if self.fight_1 or self.fight_2:
+                self.attack_frame += 1
+                if self.fight_1:          
+                    self.animate_fight(1, self.attack_frame//6)       
+                    if self.attack_frame > 30:
+                        self.attack_frame = 0
+                        self.fight_1 = False
+                        self.fight_2 = False
+                        self.attacking = False
+                    
+                if self.fight_2:
+                    if self.attack_frame > 30:
+                        self.attack_frame = 0
+                        self.fight_1 = False
+                        self.fight_2 = False
+                        self.attacking = False
+                    self.animate_fight(2, self.attack_frame//6)                      
     
     def animate_idle(self):
         self.idle_count += 1
