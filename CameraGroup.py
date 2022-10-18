@@ -1,5 +1,6 @@
-import pygame, sys
-from random import randint
+import pygame
+import PlayerUI
+
 
 class CameraGroup(pygame.sprite.Group):
 	def __init__(self):
@@ -21,6 +22,7 @@ class CameraGroup(pygame.sprite.Group):
 		# ground
 		self.ground_surf = pygame.image.load('graphics/map.png').convert_alpha()
 		self.ground_rect = self.ground_surf.get_rect(topleft = (0,0))
+		self.player_ui = PlayerUI.SkillBar((self.half_w-100, self.display_surface.get_size()[1]-75))
 		# camera speed
 		self.mouse_speed = 0.5
 
@@ -94,16 +96,21 @@ class CameraGroup(pygame.sprite.Group):
 
 	def custom_draw(self,control):
 		
-		self.mouse_control()
+		#self.mouse_control()
+		self.center_target_camera(control)
 
 		self.internal_surf.fill('gray')
 		# ground 
 		ground_offset = self.ground_rect.topleft - self.offset + self.internal_offset
+		bar_offset = self.player_ui.rect.topleft + self.internal_offset
+
 		self.internal_surf.blit(self.ground_surf,ground_offset)
-		
+		self.internal_surf.blit(self.player_ui.image,bar_offset)
 		# active elements
 		for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
 			offset_pos = sprite.rect.topleft - self.offset + self.internal_offset
+			#if hasattr(sprite, "name") and sprite.name == "health_bar":
+			#	print("you got me") 
 			self.internal_surf.blit(sprite.image,offset_pos)
 
 		scaled_surf = pygame.transform.scale(self.internal_surf,self.internal_surface_size_vector * self.zoom_scale)
